@@ -1,8 +1,5 @@
 'use strict';
 
-// Также можно использовать .getElementById, для выбора элементов по id, разницы нет
-// const scorePlayer1 = document.getElementById('score--0');
-
 // Выбираем и присваиваем элементы константам
 const scorePlayer1 = document.querySelector('#score--0');
 const scorePlayer2 = document.querySelector('#score--1');
@@ -36,6 +33,23 @@ let player = currentScorePlayer1;
 // Переменная, чтобы остановить игру при выйгрыше(кнопки btnRollDice - бросок кости,  btnHold - сохранение результатов перестанут нажиматся). Она пойдет в условие обработчиков событий этих кнопок
 let gameRunOrStop = true;
 
+// Если текущий игрок - первый игрок, то меняем текущего игрока на второго игрока и наоборот
+const changeActivePlayer = () => {
+  // Проверяем какой сейчас текущий игрок и меняем на противополжного игрока
+  player =
+    player === currentScorePlayer1 ? currentScorePlayer2 : currentScorePlayer1;
+  // Меняем активность заднего фона
+  player1BackGround.classList.toggle('player--active');
+  player2BackGround.classList.toggle('player--active');
+};
+
+// Сбрасываем current счет
+const resetCurrentScore = () => {
+  score = 0;
+  // выводим current=0 в блоке current
+  player.textContent = score;
+};
+
 btnRollDice.addEventListener('click', () => {
   // условие для остановки игры после выйгрыши
   if (gameRunOrStop) {
@@ -50,19 +64,10 @@ btnRollDice.addEventListener('click', () => {
       player.textContent = score; // выводим счет в блоке current
       // Проверяем какое число выпало на кости, если выпало один, то текущий счет обнуляется и ходит следующий игрок
     } else if (randomDice === 1) {
-      score = 0;
-      player.textContent = score; // выводим счет=0 в блоке current
-      // Если текущий игрок первый игрок, то меняем текущего игрока на второго игрока и меняем активность заднего фона
-      if (player === currentScorePlayer1) {
-        player = currentScorePlayer2;
-        player1BackGround.classList.toggle('player--active');
-        player2BackGround.classList.toggle('player--active');
-        // Если текущий игрок первый игрок, то меняем текущего игрока на второго игрока и меняем активность заднего фона
-      } else if (player === currentScorePlayer2) {
-        player = currentScorePlayer1;
-        player1BackGround.classList.toggle('player--active');
-        player2BackGround.classList.toggle('player--active');
-      }
+      // Сбрасываем current счет и выводим в блоке current
+      resetCurrentScore();
+      // Если текущий игрок - первый игрок, то меняем текущего игрока на второго игрока и наоборот
+      changeActivePlayer();
     }
   }
 });
@@ -74,12 +79,10 @@ btnHold.addEventListener('click', () => {
     // если текущий игрок - это первый игрок
     if (player === currentScorePlayer1) {
       sumScorePlayer1 += score;
-      // обнуляемт current счет
-      score = 0;
-      // current счет=0 выводим на страницу
-      currentScorePlayer1.textContent = score;
       // итоговый счет выводим на страницу
       scorePlayer1.textContent = sumScorePlayer1;
+      // Сбрасываем current счет и выводим в блоке current
+      resetCurrentScore();
       // если итоговый счет больше или равно 100
       if (sumScorePlayer1 >= 20) {
         // меняем на false, для остановки игры после выйгрыши
@@ -93,21 +96,16 @@ btnHold.addEventListener('click', () => {
         // добавляем класс победителя для имени игрока
         document.querySelector('.name--0').classList.add('player--winner');
       } else {
-        // меняем текущего игрока
-        player = currentScorePlayer2;
-        // Меняем активность заднего фона
-        player1BackGround.classList.toggle('player--active');
-        player2BackGround.classList.toggle('player--active');
+        // Меняем текущего игрока
+        changeActivePlayer();
       }
       // если текущий игрок - это второй и игрок
     } else if (player === currentScorePlayer2) {
       sumScorePlayer2 += score;
-      // обнуляемт current счет
-      score = 0;
-      // current счет=0 выводим на страницу
-      currentScorePlayer2.textContent = score;
       // итоговый счет выводим на страницу
       scorePlayer2.textContent = sumScorePlayer2;
+      // Сбрасываем current счет и выводим в блоке current
+      resetCurrentScore();
       if (sumScorePlayer2 >= 20) {
         gameRunOrStop = false;
         diceImg.classList.remove('dice--active');
@@ -115,11 +113,8 @@ btnHold.addEventListener('click', () => {
         player2BackGround.classList.add('player--winner');
         document.querySelector('.name--1').classList.add('player--winner');
       } else {
-        // меняем текущего игрока
-        player = currentScorePlayer1;
-        // Меняем активность заднего фона
-        player1BackGround.classList.toggle('player--active');
-        player2BackGround.classList.toggle('player--active');
+        // Меняем текущего игрока
+        changeActivePlayer();
       }
     }
   }
@@ -144,13 +139,13 @@ btnNewGame.addEventListener('click', () => {
   diceImg.classList.remove('dice--active');
   // Переназначаем игрока, чтобы первый игрок начал новую игру
   player = currentScorePlayer1;
+  // Добавляем класс активности заднего фона для первого и убираем для второго, если клас уже есть JS повторно его не добавляет
+  player1BackGround.classList.add('player--active');
+  player2BackGround.classList.remove('player--active');
   // Удаляем класс победителя заднего фона для обоих игроков
   player1BackGround.classList.remove('player--winner');
   player2BackGround.classList.remove('player--winner');
   // Удаляем класс победителя для имени игрока для обоих игроков
   player1Name.classList.remove('player--winner');
   player2Name.classList.remove('player--winner');
-  // Добавляем класс активности заднего фона для первого и убираем для второго, если клас уже есть JS повторно его не добавляет
-  player1BackGround.classList.add('player--active');
-  player2BackGround.classList.remove('player--active');
 });
