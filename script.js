@@ -11,27 +11,44 @@ const currentScorePlayer1 = document.querySelector('#current--0');
 const currentScorePlayer2 = document.querySelector('#current--1');
 const player1BackGround = document.querySelector('.player--0');
 const player2BackGround = document.querySelector('.player--1');
-const player1Name = document.querySelector('.name--0');
-const player2Name = document.querySelector('.name--1');
+const player1Name = document.querySelector('#name--0');
+const player2Name = document.querySelector('#name--1');
 
-// Как и говорилось ранее, примитивные данные(числа, текст) получаемые со страницы все приходят в виде "String", соответсвенно также это работает и обратно
+// Обьявляем переменные
+let score, sumScorePlayer1, sumScorePlayer2, player, gameRunOrStop;
 
-// Сбрасываем все значения игры в ноль, чтоб при старте было 0
-scorePlayer1.textContent = 0;
-scorePlayer2.textContent = 0;
+// Функция, котороая задает начальное значения и CSS свойства, также она для кнопки "New game"
+const initialState = function () {
+  // меняем на true, чтобы начать игру(чтобы условие для двух кнопок игры перешло в true)
+  gameRunOrStop = true;
+  // Сбрасываем переменные, которые хранят итоговый счет
+  sumScorePlayer1 = 0;
+  sumScorePlayer2 = 0;
+  // Сбрасываем итоговый счет, который отображается на странице
+  scorePlayer1.textContent = 0;
+  scorePlayer2.textContent = 0;
+  // обнуляемт current счет
+  score = 0;
+  // current счет=0 выводим на страницу
+  currentScorePlayer1.textContent = score;
+  currentScorePlayer2.textContent = score;
+  // Скрываем картинку кости
+  diceImg.classList.remove('dice--active');
+  // Переназначаем игрока, чтобы первый игрок начал новую игру
+  player = currentScorePlayer1;
+  // Удаляем класс победителя заднего фона для обоих игроков
+  player1BackGround.classList.remove('player--winner');
+  player2BackGround.classList.remove('player--winner');
+  // Удаляем класс победителя для имени игрока для обоих игроков
+  player1Name.classList.remove('player--winner');
+  player2Name.classList.remove('player--winner');
+  // Добавляем класс активности заднего фона для первого и убираем для второго, если клас уже есть JS повторно его не добавляет
+  player1BackGround.classList.add('player--active');
+  player2BackGround.classList.remove('player--active');
+};
 
-// Начинаем с самого основного функционала игры - "бросок костей"
-let score = 0; // переменная, которая будет хранить значение ТЕКУЩЕГО счета, она определяется за функцией, чтобы не сбрасывалась в 0 каждый раз при клике, т.к. будет заного обьявляться каждый раз
-
-// Переменные, которые хранят итоговый счет, по которому выносится результат победы (при счете 100 победа)
-let sumScorePlayer1 = 0;
-let sumScorePlayer2 = 0;
-
-// Переменная, чтобы менять текущего игрока
-let player = currentScorePlayer1;
-
-// Переменная, чтобы остановить игру при выйгрыше(кнопки btnRollDice - бросок кости,  btnHold - сохранение результатов перестанут нажиматся). Она пойдет в условие обработчиков событий этих кнопок
-let gameRunOrStop = true;
+// Вызываем функцию, чтобы переменные подхватили значения let score, sumScorePlayer1, sumScorePlayer2, player, gameRunOrStop;
+initialState();
 
 // Если текущий игрок - первый игрок, то меняем текущего игрока на второго игрока и наоборот
 const changeActivePlayer = () => {
@@ -50,8 +67,18 @@ const resetCurrentScore = () => {
   player.textContent = score;
 };
 
+// Окончить игру
+const finishGame = () => {
+  // меняем на false, для остановки игры после выйгрыши
+  gameRunOrStop = false;
+  // убираем отображение кости
+  diceImg.classList.remove('dice--active');
+};
+
+// Кнопка "броска кости"
 btnRollDice.addEventListener('click', () => {
   // условие для остановки игры после выйгрыши
+  console.log('dalbaeb');
   if (gameRunOrStop) {
     // Генерируем рандомное число, обьявляем внутри функции, чтобы при КАЖДОМ нажатии кнопки, генерировалось новое рандомное число(имитация броска кости)
     const randomDice = Math.trunc(Math.random() * 6) + 1;
@@ -84,17 +111,15 @@ btnHold.addEventListener('click', () => {
       // Сбрасываем current счет и выводим в блоке current
       resetCurrentScore();
       // если итоговый счет больше или равно 100
-      if (sumScorePlayer1 >= 20) {
-        // меняем на false, для остановки игры после выйгрыши
-        gameRunOrStop = false;
-        // убираем отображение кости
-        diceImg.classList.remove('dice--active');
+      if (sumScorePlayer1 >= 100) {
+        // Заканчиваем игру
+        finishGame();
         // убираем класс активности заднего фона
         player1BackGround.classList.remove('player--active');
         // добавляем класс победителя заднего фона
         player1BackGround.classList.add('player--winner');
         // добавляем класс победителя для имени игрока
-        document.querySelector('.name--0').classList.add('player--winner');
+        player1Name.classList.add('player--winner');
       } else {
         // Меняем текущего игрока
         changeActivePlayer();
@@ -106,12 +131,12 @@ btnHold.addEventListener('click', () => {
       scorePlayer2.textContent = sumScorePlayer2;
       // Сбрасываем current счет и выводим в блоке current
       resetCurrentScore();
-      if (sumScorePlayer2 >= 20) {
-        gameRunOrStop = false;
-        diceImg.classList.remove('dice--active');
+      if (sumScorePlayer2 >= 100) {
+        // Заканчиваем игру
+        finishGame();
         player2BackGround.classList.remove('player--active');
         player2BackGround.classList.add('player--winner');
-        document.querySelector('.name--1').classList.add('player--winner');
+        player2Name.classList.add('player--winner');
       } else {
         // Меняем текущего игрока
         changeActivePlayer();
@@ -121,31 +146,4 @@ btnHold.addEventListener('click', () => {
 });
 
 // Кнопка reset, для того, чтобы начать игру заного
-btnNewGame.addEventListener('click', () => {
-  // меняем на true, чтобы начать игру(чтобы условие для двух кнопок игры перешло в true)
-  gameRunOrStop = true;
-  // Сбрасываем переменные, которые хранят итоговый счет
-  sumScorePlayer1 = 0;
-  sumScorePlayer2 = 0;
-  // Сбрасываем итоговый счет, который отображается на странице
-  scorePlayer1.textContent = 0;
-  scorePlayer2.textContent = 0;
-  // обнуляемт current счет
-  score = 0;
-  // current счет=0 выводим на страницу
-  currentScorePlayer1.textContent = score;
-  currentScorePlayer2.textContent = score;
-  // Скрываем картинку кости
-  diceImg.classList.remove('dice--active');
-  // Переназначаем игрока, чтобы первый игрок начал новую игру
-  player = currentScorePlayer1;
-  // Добавляем класс активности заднего фона для первого и убираем для второго, если клас уже есть JS повторно его не добавляет
-  player1BackGround.classList.add('player--active');
-  player2BackGround.classList.remove('player--active');
-  // Удаляем класс победителя заднего фона для обоих игроков
-  player1BackGround.classList.remove('player--winner');
-  player2BackGround.classList.remove('player--winner');
-  // Удаляем класс победителя для имени игрока для обоих игроков
-  player1Name.classList.remove('player--winner');
-  player2Name.classList.remove('player--winner');
-});
+btnNewGame.addEventListener('click', initialState);
